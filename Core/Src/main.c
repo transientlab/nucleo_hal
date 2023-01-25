@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,6 +31,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define SCREEN_FONT		     Font_7x10
+
 #define TIM1_PWM_FREQ_4K      7500
 #define TIM1_PWM_FREQ_8K      15000
 #define TIM1_PWM_FREQ_16K     30000
@@ -140,7 +142,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uint32_t i;
   uint32_t adc_raw[3];
+  uint32_t tmp[4];
   char buffer [8];
+
 //  HAL_ADC_Start_DMA(&hadc1, adc_raw, 3);
 
   while (1)
@@ -151,16 +155,21 @@ int main(void)
 //	  adc_raw = 3.4 * HAL_ADC_GetValue(&hadc1) / 4095;
 //	  gcvt((float)adc_raw[0], 5, buffer);
 	  HAL_ADC_Start_DMA(&hadc1, adc_raw, 3);
-	  ssd1306_Fill(Black);
-	  ssd1306_SetCursor(0, 0);
-	  itoa(adc_raw[0], buffer, 10);
-	  ssd1306_WriteString(buffer, Font_11x18, White);
-	  ssd1306_SetCursor(0, 20);
-	  itoa(adc_raw[1], buffer, 10);
-	  ssd1306_WriteString(buffer, Font_11x18, White);
-	  ssd1306_SetCursor(0, 40);
-	  itoa(adc_raw[2], buffer, 10);
-	  ssd1306_WriteString(buffer, Font_11x18, White);
+    i = 10000; while(i--);
+
+	  // HAL_DACEx_DualSetValue(&hdac1, DAC_ALIGN_12B_L, adc_raw[0], adc_raw[1]);
+    HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, &adc_raw[0], DAC)
+	  i = 10000; while(i--);
+
+    tmp[0] = HAL_DAC_GetValue(&hdac1, DAC1_CHANNEL_1);
+    tmp[1] = HAL_DAC_GetValue(&hdac1, DAC1_CHANNEL_2);
+    ssd1306_Fill(Black);
+	  ssd1306_SetCursor(0, 0); itoa(adc_raw[0], buffer, 16); ssd1306_WriteString(buffer, SCREEN_FONT, White);
+	  ssd1306_SetCursor(64, 0); itoa(tmp[0], buffer, 16); ssd1306_WriteString(buffer, SCREEN_FONT, White);
+	  ssd1306_SetCursor(0, 20); itoa(adc_raw[1], buffer, 16); ssd1306_WriteString(buffer, SCREEN_FONT, White);
+    ssd1306_SetCursor(64, 20); itoa(tmp[1], buffer, 16); ssd1306_WriteString(buffer, SCREEN_FONT, White);
+	  ssd1306_SetCursor(0, 40); itoa(adc_raw[2], buffer, 16); ssd1306_WriteString(buffer, SCREEN_FONT, White);
+    ssd1306_SetCursor(64, 40); itoa(tmp[2], buffer, 16); ssd1306_WriteString(buffer, SCREEN_FONT, White);
 	  ssd1306_UpdateScreen();
 
 

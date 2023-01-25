@@ -35,34 +35,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := tim1_pwm3phase
+BUILD_ARTIFACT_NAME := stm32f303k8_hal
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-tim1_pwm3phase.elf \
+stm32f303k8_hal.elf \
 
 MAP_FILES += \
-tim1_pwm3phase.map \
+stm32f303k8_hal.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-tim1_pwm3phase.list \
+stm32f303k8_hal.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: tim1_pwm3phase.elf secondary-outputs
+main-build: stm32f303k8_hal.elf secondary-outputs
 
 # Tool invocations
-tim1_pwm3phase.elf tim1_pwm3phase.map: $(OBJS) $(USER_OBJS) C:\Users\kr315\Desktop\cubeide_workspace\tim1_pwm3phase\STM32F303K8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "tim1_pwm3phase.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\kr315\Desktop\cubeide_workspace\tim1_pwm3phase\STM32F303K8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tim1_pwm3phase.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+stm32f303k8_hal.elf stm32f303k8_hal.map: $(OBJS) $(USER_OBJS) C:\Users\kr315\Desktop\dev\stm32f303k8_hal\STM32F303K8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "stm32f303k8_hal.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\kr315\Desktop\dev\stm32f303k8_hal\STM32F303K8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32f303k8_hal.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -71,14 +71,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-tim1_pwm3phase.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "tim1_pwm3phase.list"
+stm32f303k8_hal.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "stm32f303k8_hal.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout tim1_pwm3phase.elf tim1_pwm3phase.list tim1_pwm3phase.map
+	-$(RM) default.size.stdout stm32f303k8_hal.elf stm32f303k8_hal.list stm32f303k8_hal.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
