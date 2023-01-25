@@ -1,4 +1,4 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/dma.o: ../Core/Src/dma.c ../Core/Inc/dma.h ../Core/Inc/main.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal.h \
  ../Core/Inc/stm32f3xx_hal_conf.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_rcc.h \
@@ -34,10 +34,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h \
  C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306.h \
  C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306_conf.h \
- C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306_fonts.h \
- ../Core/Inc/adc.h ../Core/Inc/main.h ../Core/Inc/dac.h ../Core/Inc/dma.h \
- ../Core/Inc/i2c.h ../Core/Inc/tim.h ../Core/Inc/usart.h \
- ../Core/Inc/gpio.h
+ C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306_fonts.h
+../Core/Inc/dma.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal.h:
 ../Core/Inc/stm32f3xx_hal_conf.h:
@@ -75,11 +73,3 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306.h:
 C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306_conf.h:
 C:/Users/kr315/Desktop/dev/stm32f303k8_hal/Drivers/ssd1306/ssd1306_fonts.h:
-../Core/Inc/adc.h:
-../Core/Inc/main.h:
-../Core/Inc/dac.h:
-../Core/Inc/dma.h:
-../Core/Inc/i2c.h:
-../Core/Inc/tim.h:
-../Core/Inc/usart.h:
-../Core/Inc/gpio.h:
