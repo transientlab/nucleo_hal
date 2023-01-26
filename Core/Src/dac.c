@@ -26,7 +26,6 @@
 
 DAC_HandleTypeDef hdac1;
 DMA_HandleTypeDef hdma_dac1_ch1;
-DMA_HandleTypeDef hdma_dac1_ch2;
 
 /* DAC1 init function */
 void MX_DAC1_Init(void)
@@ -58,14 +57,6 @@ void MX_DAC1_Init(void)
   {
     Error_Handler();
   }
-
-  /** DAC channel OUT2 config
-  */
-  sConfig.DAC_OutputSwitch = DAC_OUTPUTSWITCH_ENABLE;
-  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN DAC1_Init 2 */
 
   /* USER CODE END DAC1_Init 2 */
@@ -87,9 +78,8 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* dacHandle)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**DAC1 GPIO Configuration
     PA4     ------> DAC1_OUT1
-    PA5     ------> DAC1_OUT2
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Pin = GPIO_PIN_4;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -103,7 +93,7 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* dacHandle)
     hdma_dac1_ch1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
     hdma_dac1_ch1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_dac1_ch1.Init.Mode = DMA_CIRCULAR;
-    hdma_dac1_ch1.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_dac1_ch1.Init.Priority = DMA_PRIORITY_LOW;
     if (HAL_DMA_Init(&hdma_dac1_ch1) != HAL_OK)
     {
       Error_Handler();
@@ -112,24 +102,6 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* dacHandle)
     __HAL_DMA_REMAP_CHANNEL_ENABLE(HAL_REMAPDMA_TIM6_DAC1_CH1_DMA1_CH3);
 
     __HAL_LINKDMA(dacHandle,DMA_Handle1,hdma_dac1_ch1);
-
-    /* DAC1_CH2 Init */
-    hdma_dac1_ch2.Instance = DMA1_Channel4;
-    hdma_dac1_ch2.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_dac1_ch2.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_dac1_ch2.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_dac1_ch2.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    hdma_dac1_ch2.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    hdma_dac1_ch2.Init.Mode = DMA_CIRCULAR;
-    hdma_dac1_ch2.Init.Priority = DMA_PRIORITY_HIGH;
-    if (HAL_DMA_Init(&hdma_dac1_ch2) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_DMA_REMAP_CHANNEL_ENABLE(HAL_REMAPDMA_TIM7_DAC1_CH2_DMA1_CH4);
-
-    __HAL_LINKDMA(dacHandle,DMA_Handle2,hdma_dac1_ch2);
 
   /* USER CODE BEGIN DAC1_MspInit 1 */
 
@@ -150,13 +122,11 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* dacHandle)
 
     /**DAC1 GPIO Configuration
     PA4     ------> DAC1_OUT1
-    PA5     ------> DAC1_OUT2
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_5);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4);
 
     /* DAC1 DMA DeInit */
     HAL_DMA_DeInit(dacHandle->DMA_Handle1);
-    HAL_DMA_DeInit(dacHandle->DMA_Handle2);
   /* USER CODE BEGIN DAC1_MspDeInit 1 */
 
   /* USER CODE END DAC1_MspDeInit 1 */
