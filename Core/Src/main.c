@@ -67,7 +67,7 @@
 
 /* USER CODE BEGIN PV */
 uint32_t timer_ar_value = TIM1_PWM_FREQ_4K;
-uint32_t i = 0;
+//uint32_t i = 0;
 uint32_t j = 0;
 uint32_t tmp[4];
 uint32_t adc_buffer[BUFFERSIZE];
@@ -121,19 +121,22 @@ int main(void)
   MX_TIM1_Init();
   MX_I2C1_Init();
   MX_ADC1_Init();
-  MX_DAC1_Init();
   MX_TIM6_Init();
+  MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT( &htim1 );
-  HAL_TIM_PWM_Start( &htim1, TIM_CHANNEL_1 );
-  HAL_TIM_PWM_Start( &htim1, TIM_CHANNEL_2 );
-  HAL_TIM_PWM_Start( &htim1, TIM_CHANNEL_3 );
-  HAL_TIMEx_PWMN_Start( &htim1, TIM_CHANNEL_1 );
-  HAL_TIMEx_PWMN_Start( &htim1, TIM_CHANNEL_2 );
-  HAL_TIMEx_PWMN_Start( &htim1, TIM_CHANNEL_3 );
+//  inbufferPtr = &adc_buffer[0];
+//  outbufferPtr = &dac_buffer[0];
+//
+//  HAL_TIM_Base_Start_IT( &htim1 );
+//  HAL_TIM_PWM_Start( &htim1, TIM_CHANNEL_1 );
+//  HAL_TIM_PWM_Start( &htim1, TIM_CHANNEL_2 );
+//  HAL_TIM_PWM_Start( &htim1, TIM_CHANNEL_3 );
+//  HAL_TIMEx_PWMN_Start( &htim1, TIM_CHANNEL_1 );
+//  HAL_TIMEx_PWMN_Start( &htim1, TIM_CHANNEL_2 );
+//  HAL_TIMEx_PWMN_Start( &htim1, TIM_CHANNEL_3 );
   HAL_TIM_Base_Start(&htim6);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, BUFFERSIZE);
-  HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, (uint32_t*)dac_buffer, BUFFERSIZE, DAC_ALIGN_12B_R);
+  HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, (uint32_t *)dac_buffer, BUFFERSIZE, DAC_ALIGN_12B_R);
   ssd1306_Init();
   /* USER CODE END 2 */
 
@@ -144,6 +147,11 @@ int main(void)
 	  if (j>127) {
 		  HAL_GPIO_TogglePin(GPIOB, LED_Pin);
 		  j = 0;
+		  ssd1306_Fill(Black);
+		  for(int i=0; i<BUFFERSIZE/2; i++) {
+		   ssd1306_DrawPixel(2*i, (64*adc_buffer[i])/4100, White);
+		  }
+		  ssd1306_UpdateScreen();
 	  }
 	  else {
 		  j ++;
@@ -163,17 +171,18 @@ int main(void)
 //
 //	i = 10000; while(i--);
 	  tmp[2] = j;
-  ssd1306_Fill(Black);
-  for(i=0; i<BUFFERSIZE; i++) {
-	  ssd1306_DrawPixel(i, (2+64*adc_buffer[i])/4100, White);
-  }
+//  ssd1306_Fill(Black);
+//  for(i=0; i<BUFFERSIZE; i++) {
+//	  ssd1306_DrawPixel(i, (2+64*adc_buffer[i/2])/4100, White);
+//  }
+//  ssd1306_UpdateScreen();
   // ssd1306_SetCursor(0, 0); 		itoa(adc_buffer[0], buffer, 16); 	ssd1306_WriteString(buffer, SCREEN_FONT, White);
   // ssd1306_SetCursor(64, 0); 	itoa(tmp[0], buffer, 16); 			ssd1306_WriteString(buffer, SCREEN_FONT, White);
   // ssd1306_SetCursor(0, 12); 	itoa(adc_buffer[1], buffer, 16); 	ssd1306_WriteString(buffer, SCREEN_FONT, White);
   // ssd1306_SetCursor(64, 12); 	itoa(tmp[1], buffer, 16); 			ssd1306_WriteString(buffer, SCREEN_FONT, White);
   // ssd1306_SetCursor(0, 24); 	itoa(adc_buffer[2], buffer, 16); 	ssd1306_WriteString(buffer, SCREEN_FONT, White);
   // ssd1306_SetCursor(64, 24); 	itoa(tmp[2], buffer, 16); 			ssd1306_WriteString(buffer, SCREEN_FONT, White);
-  ssd1306_UpdateScreen();
+
   processDSP();
 
     /* USER CODE END WHILE */
@@ -199,9 +208,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL4;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -220,9 +227,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_TIM1
-                              |RCC_PERIPHCLK_ADC12;
-  PeriphClkInit.Adc12ClockSelection = RCC_ADC12PLLCLK_DIV1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_TIM1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
   PeriphClkInit.Tim1ClockSelection = RCC_TIM1CLK_HCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
@@ -269,17 +274,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
-	inbufferPtr = &adc_buffer[0];
-	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
+	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
+	outbufferPtr = &dac_buffer[0];
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-  inbufferPtr = &adc_buffer[BUFFERSIZE/2];
-  outbufferPtr = &dac_buffer[0];
+  inbufferPtr = &adc_buffer[0];
+  outbufferPtr = &dac_buffer[BUFFERSIZE/2];
 }
 
 void processDSP() {
-  for(i=0; i<BUFFERSIZE/2; i++) {
+  for(int i=0; i<BUFFERSIZE/2; i++) {
     outbufferPtr[i] = inbufferPtr[i];
   }
 }

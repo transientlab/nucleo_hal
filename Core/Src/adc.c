@@ -37,7 +37,6 @@ void MX_ADC1_Init(void)
 
   ADC_MultiModeTypeDef multimode = {0};
   ADC_ChannelConfTypeDef sConfig = {0};
-  ADC_InjectionConfTypeDef sConfigInjected = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
 
@@ -46,7 +45,7 @@ void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -81,25 +80,6 @@ void MX_ADC1_Init(void)
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Injected Channel
-  */
-  sConfigInjected.InjectedChannel = ADC_CHANNEL_1;
-  sConfigInjected.InjectedRank = ADC_INJECTED_RANK_1;
-  sConfigInjected.InjectedSingleDiff = ADC_SINGLE_ENDED;
-  sConfigInjected.InjectedNbrOfConversion = 1;
-  sConfigInjected.InjectedSamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  sConfigInjected.ExternalTrigInjecConvEdge = ADC_EXTERNALTRIGINJECCONV_EDGE_RISING;
-  sConfigInjected.ExternalTrigInjecConv = ADC_INJECTED_SOFTWARE_START;
-  sConfigInjected.AutoInjectedConv = DISABLE;
-  sConfigInjected.InjectedDiscontinuousConvMode = DISABLE;
-  sConfigInjected.QueueInjectedContext = DISABLE;
-  sConfigInjected.InjectedOffset = 0;
-  sConfigInjected.InjectedOffsetNumber = ADC_OFFSET_NONE;
-  if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
   {
     Error_Handler();
   }
@@ -139,7 +119,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
     hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_adc1.Init.Mode = DMA_CIRCULAR;
-    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc1.Init.Priority = DMA_PRIORITY_HIGH;
     if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
     {
       Error_Handler();
