@@ -54,7 +54,6 @@ uint32_t dac_buffer[BUFFERSIZE];
 uint32_t dsp_buffer[BUFFERSIZE];
 static volatile uint32_t* inbufferPtr;
 static volatile uint32_t* outbufferPtr;
-uint32_t adhggc_buffer[BUFFERSIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,7 +100,6 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM6_Init();
   MX_DAC1_Init();
-
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start(&htim6);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, BUFFERSIZE);
@@ -163,23 +161,28 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void processDSP() {
-
-	for(int n=1; n<BUFFERSIZE; n++) {
-		outbufferPtr[n-1] = (inbufferPtr[n]+inbufferPtr[n-1])/2;
+	for(int n=1; n<BUFFERSIZE/2; n++) {
+//		outbufferPtr[n-1] = (inbufferPtr[n]+inbufferPtr[n-1])/2;
+		outbufferPtr[n] = inbufferPtr[n];
 	}
-//	outbufferPtr[0] = (inbufferPtr[0] + outbufferPtr[1])/2;
 
 }
 
+void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac) {
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+}
 
 // Rotating buffer, split half processDSP loop length to work
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-//	inbufferPtr = &adc_buffer[0];
-//	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
+	inbufferPtr = &adc_buffer[0];
+	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
-//	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
-//	outbufferPtr = &dac_buffer[0];
+	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
+	outbufferPtr = &dac_buffer[0];
 
 }
 
