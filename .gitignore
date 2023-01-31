@@ -1,0 +1,17 @@
+/all/Default/
+/all/Debug/
+/all/Build/
+/adda/Default/
+/adda/Debug/
+/adda/Build/
+
+*.DS_Store
+
+*.o
+*.bin
+*.elf
+*.raw
+
+*.log
+
+*.plt
