@@ -131,6 +131,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -138,7 +139,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -157,11 +160,17 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC12;
+  PeriphClkInit.Adc12ClockSelection = RCC_ADC12PLLCLK_DIV1;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
 void processDSP() {
-	for(int n=1; n<BUFFERSIZE/2; n++) {
+	for(int n=0; n<BUFFERSIZE/2; n++) {
 //		outbufferPtr[n-1] = (inbufferPtr[n]+inbufferPtr[n-1])/2;
 		outbufferPtr[n] = inbufferPtr[n];
 	}
@@ -174,15 +183,16 @@ void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac) {
 
 // Rotating buffer, split half processDSP loop length to work
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	inbufferPtr = &adc_buffer[0];
-	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
+	outbufferPtr = &dac_buffer[0];
+
 
 
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
-	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
-	outbufferPtr = &dac_buffer[0];
+	inbufferPtr = &adc_buffer[0];
+	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
 }
 
