@@ -66,7 +66,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t timer_ar_value = TIM1_PWM_FREQ_4K;
+//uint32_t timer_ar_value = TIM1_PWM_FREQ_4K;
 //uint32_t i = 0;
 uint32_t j = 0;
 uint32_t tmp[4];
@@ -142,20 +142,22 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  inbufferPtr = &adc_buffer[0];
+  outbufferPtr = &dac_buffer[BUFFERSIZE/2];
   while (1)
   {
-	  if (j>127) {
-		  HAL_GPIO_TogglePin(GPIOB, LED_Pin);
-		  j = 0;
-		  ssd1306_Fill(Black);
-		  for(int i=0; i<BUFFERSIZE/2; i++) {
-		   ssd1306_DrawPixel(2*i, (64*adc_buffer[i])/4100, White);
-		  }
-		  ssd1306_UpdateScreen();
-	  }
-	  else {
-		  j ++;
-	  }
+//	  if (j>127) {
+//		  HAL_GPIO_TogglePin(GPIOB, LED_Pin);
+//		  j = 0;
+//		  ssd1306_Fill(Black);
+//		  for(int i=0; i<BUFFERSIZE/2; i++) {
+//		   ssd1306_DrawPixel(2*i, (64*adc_buffer[i])/4100, White);
+//		  }
+//		  ssd1306_UpdateScreen();
+//	  }
+//	  else {
+//		  j ++;
+//	  }
 
 //	HAL_ADC_PollForConversion(&hadc1, 100);
 //	adc_buffer = 3.4 * HAL_ADC_GetValue(&hadc1) / 4095;
@@ -170,7 +172,7 @@ int main(void)
 //	HAL_DAC_Start(&hdac1, DAC1_CHANNEL_2);
 //
 //	i = 10000; while(i--);
-	  tmp[2] = j;
+//	  tmp[2] = j;
 //  ssd1306_Fill(Black);
 //  for(i=0; i<BUFFERSIZE; i++) {
 //	  ssd1306_DrawPixel(i, (2+64*adc_buffer[i/2])/4100, White);
@@ -183,7 +185,9 @@ int main(void)
   // ssd1306_SetCursor(0, 24); 	itoa(adc_buffer[2], buffer, 16); 	ssd1306_WriteString(buffer, SCREEN_FONT, White);
   // ssd1306_SetCursor(64, 24); 	itoa(tmp[2], buffer, 16); 			ssd1306_WriteString(buffer, SCREEN_FONT, White);
 
-  processDSP();
+
+
+//  processDSP();
 
     /* USER CODE END WHILE */
 
@@ -237,50 +241,16 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if ( timer_ar_value == TIM1_PWM_FREQ_4K )
-  {
-    timer_ar_value = TIM1_PWM_FREQ_8K;
-    __HAL_TIM_SET_AUTORELOAD( &htim1, TIM1_PWM_FREQ_8K );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_1, TIM1_PWM_8K_25DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_2, TIM1_PWM_8K_50DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_3, TIM1_PWM_8K_75DUTY );
-  }
-  else if ( timer_ar_value == TIM1_PWM_FREQ_8K )
-  {
-    timer_ar_value = TIM1_PWM_FREQ_16K;
-    __HAL_TIM_SET_AUTORELOAD( &htim1, TIM1_PWM_FREQ_16K );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_1, TIM1_PWM_16K_25DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_2, TIM1_PWM_16K_50DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_3, TIM1_PWM_16K_75DUTY );
-  }
-  else if ( timer_ar_value == TIM1_PWM_FREQ_16K )
-  {
-    timer_ar_value = TIM1_PWM_FREQ_4K;
-    __HAL_TIM_SET_AUTORELOAD( &htim1, TIM1_PWM_FREQ_4K );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_1, TIM1_PWM_4K_25DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_2, TIM1_PWM_4K_50DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_3, TIM1_PWM_4K_75DUTY );
-  }
-  else
-  {
-    timer_ar_value = TIM1_PWM_FREQ_4K;
-    __HAL_TIM_SET_AUTORELOAD( &htim1, TIM1_PWM_FREQ_4K );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_1, TIM1_PWM_4K_25DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_2, TIM1_PWM_4K_50DUTY );
-    __HAL_TIM_SET_COMPARE( &htim1, TIM_CHANNEL_3, TIM1_PWM_4K_75DUTY );
-  }
-}
-
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
 	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
 	outbufferPtr = &dac_buffer[0];
+	processDSP();
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
   inbufferPtr = &adc_buffer[0];
   outbufferPtr = &dac_buffer[BUFFERSIZE/2];
+  processDSP();
 }
 
 void processDSP() {
