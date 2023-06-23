@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "dac.h"
 #include "dma.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -37,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BUFFERSIZE 256
+#define BUFFERSIZE 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -58,6 +59,7 @@ static volatile uint32_t* outbufferPtr;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void processDSP();
 /* USER CODE END PFP */
@@ -100,6 +102,11 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM6_Init();
   MX_DAC1_Init();
+  MX_I2C1_Init();
+  MX_TIM1_Init();
+
+  /* Initialize interrupts */
+  MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start(&htim6);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, BUFFERSIZE);
@@ -113,8 +120,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+//	  processDSP();
 	  processDSP();
-
 
     /* USER CODE END WHILE */
 
@@ -139,9 +146,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL4;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -160,39 +165,55 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC12;
-  PeriphClkInit.Adc12ClockSelection = RCC_ADC12PLLCLK_DIV1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_TIM1;
+  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
+  PeriphClkInit.Tim1ClockSelection = RCC_TIM1CLK_HCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
 }
 
+/**
+  * @brief NVIC Configuration.
+  * @retval None
+  */
+static void MX_NVIC_Init(void)
+{
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  /* DMA1_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+}
+
 /* USER CODE BEGIN 4 */
 void processDSP() {
-	for(int n=0; n<BUFFERSIZE/2; n++) {
-//		outbufferPtr[n-1] = (inbufferPtr[n]+inbufferPtr[n-1])/2;
+	for(int n=0; n<BUFFERSIZE; n++) {
+//		outbufferPtr[n] = (inbufferPtr[n]+inbufferPtr[n+1])/2;
 		outbufferPtr[n] = inbufferPtr[n];
 	}
 
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac) {
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+//	HAL_ADC_
+
 }
 
 // Rotating buffer, split half processDSP loop length to work
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
-	outbufferPtr = &dac_buffer[0];
+//	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
+//	outbufferPtr = &dac_buffer[0];
+
 
 
 
 }
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
-	inbufferPtr = &adc_buffer[0];
-	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+//	inbufferPtr = &adc_buffer[0];
+//	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
 
 }
 
