@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BUFFERSIZE 4
+#define BUFFERSIZE 64
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,11 +50,13 @@
 
 /* USER CODE BEGIN PV */
 
-uint32_t adc_buffer[BUFFERSIZE];
-uint32_t dac_buffer[BUFFERSIZE];
+uint32_t out_buffer[BUFFERSIZE];
+uint32_t in_buffer[BUFFERSIZE];
 uint32_t dsp_buffer[BUFFERSIZE];
 static volatile uint32_t* inbufferPtr;
-static volatile uint32_t* outbufferPtr;
+static volatile uint32_t* outbufferPtr = &out_buffer[0];
+int16_t dataReadyFlag;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,10 +111,10 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start(&htim6);
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, BUFFERSIZE);
-	HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, (uint32_t *)dac_buffer, BUFFERSIZE, DAC_ALIGN_12B_R);
-	inbufferPtr = &adc_buffer[0];
-	outbufferPtr = &dac_buffer[0];
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)in_buffer, BUFFERSIZE);
+	HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, (uint32_t *)out_buffer, BUFFERSIZE, DAC_ALIGN_12B_R);
+	inbufferPtr = &in_buffer[0];
+	outbufferPtr = &out_buffer[0];
 
   /* USER CODE END 2 */
 
@@ -120,8 +122,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  processDSP();
-	  processDSP();
+
+    if (dataReadyFlag == 1) {
+      processDSP();
+    }
+	  
 
     /* USER CODE END WHILE */
 
@@ -190,30 +195,38 @@ static void MX_NVIC_Init(void)
 
 /* USER CODE BEGIN 4 */
 void processDSP() {
-	for(int n=0; n<BUFFERSIZE; n++) {
-//		outbufferPtr[n] = (inbufferPtr[n]+inbufferPtr[n+1])/2;
+	for(int n=0; n<BUFFERSIZE/2; n++) {
 		outbufferPtr[n] = inbufferPtr[n];
+//	  if(n%2)
+//	  {
+//	    outbufferPtr[n] = 3000;
+//	  }
+//	  else
+//	  {
+//	    outbufferPtr[n] = 0;
+//	  }
+
+
 	}
+	dataReadyFlag = 0;
 
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac) {
-//	HAL_ADC_
 
 }
 
 // Rotating buffer, split half processDSP loop length to work
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-//	inbufferPtr = &adc_buffer[BUFFERSIZE/2];
-//	outbufferPtr = &dac_buffer[0];
-
-
-
-
+	inbufferPtr = &in_buffer[0];
+	outbufferPtr = &out_buffer[0];
+  dataReadyFlag = 1;
 }
+
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
-//	inbufferPtr = &adc_buffer[0];
-//	outbufferPtr = &dac_buffer[BUFFERSIZE/2];
+	inbufferPtr = &in_buffer[BUFFERSIZE/2];
+	outbufferPtr = &out_buffer[BUFFERSIZE/2];
+  dataReadyFlag = 1;
 
 }
 
